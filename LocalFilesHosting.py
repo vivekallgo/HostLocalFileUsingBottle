@@ -31,14 +31,28 @@ def startServer(staticFilesRoot, http_port, wsgiServerName):
                 fn = os.path.join(path, parent)
                 tree['children'].append(dict(parent=(fn.replace(path,"http://localhost:8080/static")).replace('\\','/')))
         return tree
+
+    def make_tree_all(path):
+        tree = dict(name=path, children=[])
+        try: lst = os.listdir(path)
+        except OSError:
+            pass #ignore errors
+        else:
+            for name in lst:
+                fn = os.path.join(path, name)
+                if os.path.isdir(fn):
+                    tree['children'].append(make_tree_all(fn))
+                else:
+                    tree['children'].append(dict(parent=(fn.replace(path,"http://localhost:8080/static")).replace('\\','/')))
+        return tree
     
     
 
     @app.route('/')
     def server_static(filepath="index.html"):
         tempPath = staticFilesRoot.replace('\\','/')
-        infoFromJson = make_tree(tempPath)
-        infoFromJson = json2html.convert(json = infoFromJson,table_attributes="id=\"info-table\" class=\"table table-bordered table-hover\"")
+        infoFromJson = make_tree_all(tempPath)
+        #infoFromJson = json2html.convert(json = infoFromJson,table_attributes="id=\"info-table\" class=\"table table-bordered table-hover\"")
         return infoFromJson;   
 
     @app.route('/images/<filename:re:.*\.png>')
