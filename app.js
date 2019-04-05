@@ -6,6 +6,7 @@ var serveStatic = require("serve-static");
 var fs = require("fs");
 var app = express();
 var favicon = require("serve-favicon");
+
 const archiver = require("archiver");
 
 /**
@@ -35,6 +36,8 @@ function filter(name) {
 }
 
 var FolderPath = "C:/ProgramData/AllGoVision/";
+
+//app.use(favicon(path.join(__dirname, "/html/icons/Rescue.ico")));
 app.use(
   "/",
   express.static(FolderPath),
@@ -48,7 +51,10 @@ app.use(
 );
 app.use(express.static(path.join(__dirname, "html")));
 app.get("/download", function(req, res) {
-  zipDirectory(FolderPath, FolderPath + "AllGoVisionLogs.zip")
+  zipDirectory(
+    FolderPath,
+    __dirname + "/html/downloadedFiles/" + "AllGoVisionLogs.zip"
+  )
     .then(result => {
       res.send("Download Completed.");
     })
@@ -56,9 +62,10 @@ app.get("/download", function(req, res) {
       res.status(400).send("Error:", error);
     });
 });
+
 app.all(
-  "*/Rescue.ico",
-  serveStatic(__dirname + "/html/icons/Rescue.ico", {
+  "*/rescue.ico",
+  serveStatic(__dirname + "/html/icons", {
     fallthrough: false,
     lastModified: false,
     maxAge: "1y"
